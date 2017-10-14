@@ -1,3 +1,4 @@
+
 from data_format import *
 import numpy as np
 from matplotlib import pyplot as plt
@@ -147,7 +148,7 @@ class DataVis():
                         self.scurve[i][j] = scurve_packet.sc_data.payload.int32_data[i][j]                       
 
             
-    def plot_pdm(self, level, gtu_num, threshold):
+    def plot_pdm(self, level, gtu_num, threshold = 0):
         """
         plot the PDM
         input the level of data and GTU #
