@@ -48,9 +48,15 @@ class DataVis():
         else:
             print "ERROR: file type is not recognised"
             
+    def _perform_mapping(self):
+        """
+        """
+            
+            
     def _read_data(self):
 
         DataVis._classify_file(self)
+        
         if self._file_type == "cpu_main":
             
             with open(self.filename, "rb") as cpu_file:
@@ -84,14 +90,14 @@ class DataVis():
             with open(self.filename, "rb") as sc_file:
 
                 # move to the first packet
-                cpu_file.seek(sizeof(CpuFileHeader))
+                sc_file.seek(sizeof(CpuFileHeader))
                 scurve_packet = SC_PACKET()
                 size = sc_file.readinto(scurve_packet)
                 
                 # put the scurve data into an indexed array
                 for i in range(NMAX_OF_THESHOLDS):
                     for j in range(N_OF_PIXEL_PER_PDM):     
-                        self.scurve[i][j] = sc_packet.sc_data.payload.int32_data[i][j]                       
+                        self.scurve[i][j] = scurve_packet.sc_data.payload.int32_data[i][j]                       
 
             
     def plot_pdm(self, level, gtu_num):
@@ -112,7 +118,7 @@ class DataVis():
         plot_focal_surface(fs)
 
 
-    def plot_sc(self):
+    def plot_sc_3d(self):
         from mpl_toolkits.mplot3d import Axes3D
 
         DataVis._read_data(self)
@@ -126,3 +132,11 @@ class DataVis():
         X, Y = np.meshgrid(x, y)
         
         ax.plot_surface(X, Y, np.transpose(self.scurve), cmap = 'viridis')
+
+    def plot_sc_2d(self, dac_level):
+
+        DataVis._read_data(self)
+
+        fig = plt.figure(figsize = (10, 10))
+        sc_2d = self.scurve[dac_level][:].reshape(self._rows, self._cols)
+        plt.imshow(sc_2d)
