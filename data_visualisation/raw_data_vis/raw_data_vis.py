@@ -56,7 +56,8 @@ class DataVis():
         map the data to show physical location of pixels on the PDM 
         input is a 1d vector of N_OF_PIXEL_PER_PDM pixels
         """
-
+        map_data = np.zeros((self._n_pmt, self._n_pmt_rows, self._n_pmt_cols))
+        
         # split into PMTs
         for i in range(self._n_pmt):
             for x in range(self._n_pmt_rows):
@@ -64,23 +65,23 @@ class DataVis():
                     map_data[i][x][y] = input_data[(y + (x * 8)) + (i * 64)]
 
         # organise into columns and perform rotations
-        col1 = [mapping[0], np.rot90(mapping[1], 1), mapping[2], 
-                np.rot90(mapping[3], 1), mapping[4], np.rot90(mapping[5],1)]
+        col1 = [map_data[0], np.rot90(map_data[1], 1), map_data[2], 
+                np.rot90(map_data[3], 1), map_data[4], np.rot90(map_data[5],1)]
     
-        col2 = [np.rot90(mapping[6], 3), np.rot90(mapping[7], 2), np.rot90(mapping[8], 3),
-                np.rot90(mapping[9], 2), np.rot90(mapping[10], 3), np.rot90(mapping[11], 2)]
+        col2 = [np.rot90(map_data[6], 3), np.rot90(map_data[7], 2), np.rot90(map_data[8], 3),
+                np.rot90(map_data[9], 2), np.rot90(map_data[10], 3), np.rot90(map_data[11], 2)]
     
-        col3 = [mapping[12], np.rot90(mapping[13], 1), mapping[14], 
-                np.rot90(mapping[15], 1), mapping[16], np.rot90(mapping[17], 1)]
+        col3 = [map_data[12], np.rot90(map_data[13], 1), map_data[14], 
+                np.rot90(map_data[15], 1), map_data[16], np.rot90(map_data[17], 1)]
             
-        col4 = [np.rot90(mapping[18], 3), np.rot90(mapping[19], 2), np.rot90(mapping[20], 3), 
-                np.rot90(mapping[21], 2), np.rot90(mapping[22], 3), np.rot90(mapping[23], 2)]
+        col4 = [np.rot90(map_data[18], 3), np.rot90(map_data[19], 2), np.rot90(map_data[20], 3), 
+                np.rot90(map_data[21], 2), np.rot90(map_data[22], 3), np.rot90(map_data[23], 2)]
             
-        col5 = [mapping[24], np.rot90(mapping[25], 1), mapping[26], 
-                np.rot90(mapping[27], 1), mapping[28], np.rot90(mapping[29], 1)]
+        col5 = [map_data[24], np.rot90(map_data[25], 1), map_data[26], 
+                np.rot90(map_data[27], 1), map_data[28], np.rot90(map_data[29], 1)]
             
-        col6 = [np.rot90(mapping[30], 3), np.rot90(mapping[31], 2), np.rot90(mapping[32], 3), 
-                np.rot90(mapping[33], 2), np.rot90(mapping[34], 3), np.rot90(mapping[35], 2)]
+        col6 = [np.rot90(map_data[30], 3), np.rot90(map_data[31], 2), np.rot90(map_data[32], 3), 
+                np.rot90(map_data[33], 2), np.rot90(map_data[34], 3), np.rot90(map_data[35], 2)]
 
         c1 = np.concatenate(col1, 0)
         c2 = np.concatenate(col2, 0)
@@ -90,10 +91,11 @@ class DataVis():
         c6 = np.concatenate(col6, 0)
 
         # rebuild PDM
-        all_rows = [c1, c2, c3, c4, c5, c6]
-        pdm = np.concatenate(all_rows, 1)
+        all_cols = [c1, c2, c3, c4, c5, c6]
+        pdm = np.concatenate(all_cols, 1)
 
         return pdm
+    
     
     def _read_data(self):
         """
@@ -114,12 +116,9 @@ class DataVis():
                 # put the zynq data into an indexed array
                 for i in range(N_OF_FRAMES_L1_V0):
                     for j in range(N_OF_PIXEL_PER_PDM):
-                        self.zynq_data_l1[i][j] =
-                        packet.zynq_packet.level1_data[self.cpu_packet_num].payload.raw_data[i][j]
-                        self.zynq_data_l2[i][j] =
-                        packet.zynq_packet.level2_data[self.cpu_packet_num].payload.int16_data[i][j]
-                        self.zynq_data_l3[i][j] =
-                        packet.zynq_packet.level3_data.payload.int32_data[i][j]
+                        self.zynq_data_l1[i][j] = packet.zynq_packet.level1_data[self.cpu_packet_num].payload.raw_data[i][j]
+                        self.zynq_data_l2[i][j] = packet.zynq_packet.level2_data[self.cpu_packet_num].payload.int16_data[i][j]
+                        self.zynq_data_l3[i][j] = packet.zynq_packet.level3_data.payload.int32_data[i][j]
 
         elif self._file_type == "raw_sc":
 
@@ -148,7 +147,7 @@ class DataVis():
                         self.scurve[i][j] = scurve_packet.sc_data.payload.int32_data[i][j]                       
 
             
-    def plot_pdm(self, level, gtu_num):
+    def plot_pdm(self, level, gtu_num, threshold):
         """
         plot the PDM
         input the level of data and GTU #
@@ -157,17 +156,17 @@ class DataVis():
         
         # get correct level of data
         if level == 1:
-            fs = self.zynq_data_l1[gtu_num].reshape(self._rows, self._cols)
+            fs = self.zynq_data_l1[gtu_num]
         elif level == 2:
-            fs = self.zynq_data_l2[gtu_num].reshape(self._rows, self._cols)
+            fs = self.zynq_data_l2[gtu_num]
         elif level == 3:
-            fs = self.zynq_data_l3[gtu_num].reshape(self._rows, self._cols)
+            fs = self.zynq_data_l3[gtu_num]
         else:
             print "ERROR: level not recognised"
 
         # make the plot    
-        pdm = DataVis._map_data()
-        plot_focal_surface(fs)
+        pdm = DataVis._map_data(self, fs)
+        plot_focal_surface(pdm, threshold)
 
 
     def plot_sc_3d(self):
@@ -195,6 +194,7 @@ class DataVis():
 
         DataVis._read_data(self)
 
-        fig = plt.figure(figsize = (10, 10))
-        sc_2d = self.scurve[dac_level][:].reshape(self._rows, self._cols)
-        plt.imshow(sc_2d)
+        sc_2d = self.scurve[dac_level][:]
+        pdm = DataVis._map_data(self, sc_2d)
+        plot_focal_surface(pdm)
+

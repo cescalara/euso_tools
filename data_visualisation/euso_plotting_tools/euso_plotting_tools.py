@@ -5,13 +5,21 @@ import matplotlib.cm as cm
 import matplotlib
 
 # Make function to plot
-def plot_focal_surface(focal_surface):
+def plot_focal_surface(focal_surface, threshold = 0):
     # set font size
     matplotlib.rcParams.update({'font.size': 22})
 
     fig = plt.figure(figsize = (8, 8))
     ax = fig.add_subplot(111)
-    p=plt.imshow(focal_surface, axes=ax, interpolation='nearest', vmin = 0)
+    if threshold != 0:
+        p = plt.imshow(focal_surface, axes=ax,
+                       interpolation='nearest', origin = 'lower',
+                       vmin = 0, vmax = threshold)
+    else:
+        p = plt.imshow(focal_surface, axes=ax,
+                       interpolation='nearest', origin = 'lower',
+                       vmin = 0)
+        
     plt.xlabel('pixel X')
     plt.ylabel('pixel Y')
 
@@ -24,7 +32,7 @@ def plot_focal_surface(focal_surface):
     ax.set_yticks(major_ticks)
     ax.set_yticks(minor_ticks, minor=True)
     ax.set_xticklabels(np.arange(0, 49, 8));
-    ax.set_yticklabels(np.arange(48, 0, -8));
+    ax.set_yticklabels(np.arange(0, 49, 8));
 
     # Set grid
     #ax.grid(which='minor', alpha=0.2)
