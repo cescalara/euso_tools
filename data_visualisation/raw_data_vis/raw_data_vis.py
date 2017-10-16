@@ -30,6 +30,7 @@ class DataVis():
         self._file_type = None
 
         self.cpu_packet_num = 0
+        self.trig_packet_num = 0
         
     def __enter__(self):
             return self
@@ -110,15 +111,16 @@ class DataVis():
             with open(self.filename, "rb") as cpu_file:
                 
                 # move to the desired packet
-                cpu_file.seek(sizeof(CpuFileHeader) * (self.cpu_packet_num + 1))
+                cpu_file.seek(sizeof(CpuFileHeader)
+                              + (sizeof(CPU_PACKET) * (self.cpu_packet_num)) )
                 packet = CPU_PACKET()
                 size = cpu_file.readinto(packet)
             
                 # put the zynq data into an indexed array
                 for i in range(N_OF_FRAMES_L1_V0):
                     for j in range(N_OF_PIXEL_PER_PDM):
-                        self.zynq_data_l1[i][j] = packet.zynq_packet.level1_data[self.cpu_packet_num].payload.raw_data[i][j]
-                        self.zynq_data_l2[i][j] = packet.zynq_packet.level2_data[self.cpu_packet_num].payload.int16_data[i][j]
+                        self.zynq_data_l1[i][j] = packet.zynq_packet.level1_data[self.trig_packet_num].payload.raw_data[i][j]
+                        self.zynq_data_l2[i][j] = packet.zynq_packet.level2_data[self.trig_packet_num].payload.int16_data[i][j]
                         self.zynq_data_l3[i][j] = packet.zynq_packet.level3_data.payload.int32_data[i][j]
 
         elif self._file_type == "raw_sc":
