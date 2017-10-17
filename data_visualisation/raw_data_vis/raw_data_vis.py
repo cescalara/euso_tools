@@ -22,9 +22,9 @@ class DataVis():
         self._n_pmt_cols = 8
 
         #initialise
-        self.zynq_data_l1 = np.zeros((N_OF_FRAMES_L1_V0, N_OF_PIXEL_PER_PDM))
-        self.zynq_data_l2 = np.zeros((N_OF_FRAMES_L1_V0, N_OF_PIXEL_PER_PDM))
-        self.zynq_data_l3 = np.zeros((N_OF_FRAMES_L1_V0, N_OF_PIXEL_PER_PDM))
+        self.zynq_data_l1 = np.zeros((N_OF_FRAMES_L1_V0, self._rows, self._cols))
+        self.zynq_data_l2 = np.zeros((N_OF_FRAMES_L1_V0, self._rows, self._cols))
+        self.zynq_data_l3 = np.zeros((N_OF_FRAMES_L1_V0, self._rows, self._cols))
         self.scurve = np.zeros((NMAX_OF_THESHOLDS, N_OF_PIXEL_PER_PDM))
         
         self._file_type = None
@@ -96,7 +96,9 @@ class DataVis():
         all_cols = [c1, c2, c3, c4, c5, c6]
         pdm = np.concatenate(all_cols, 1)
 
-        return pdm
+        # flip to reflect looking through pdm
+        pdm_flip = np.flip(pdm, 0)
+        return pdm_flip
     
     
     def _read_data(self):
@@ -118,10 +120,9 @@ class DataVis():
             
                 # put the zynq data into an indexed array
                 for i in range(N_OF_FRAMES_L1_V0):
-                    for j in range(N_OF_PIXEL_PER_PDM):
-                        self.zynq_data_l1[i][j] = packet.zynq_packet.level1_data[self.trig_packet_num].payload.raw_data[i][j]
-                        self.zynq_data_l2[i][j] = packet.zynq_packet.level2_data[self.trig_packet_num].payload.int16_data[i][j]
-                        self.zynq_data_l3[i][j] = packet.zynq_packet.level3_data.payload.int32_data[i][j]
+                    self.zynq_data_l1[i] = DataVis._map_data(self, packet.zynq_packet.level1_data[self.trig_packet_num].payload.raw_data[i])
+                    self.zynq_data_l2[i] = DataVis._map_data(self, packet.zynq_packet.level2_data[self.trig_packet_num].payload.int16_data[i])
+                    self.zynq_data_l3[i] = DataVis._map_data(self, packet.zynq_packet.level3_data.payload.int32_data[i])
 
         elif self._file_type == "raw_sc":
 
@@ -150,7 +151,7 @@ class DataVis():
                         self.scurve[i][j] = scurve_packet.sc_data.payload.int32_data[i][j]                       
 
             
-    def plot_pdm(self, level, gtu_num, threshold = 0):
+    def plot_pdm(self, level, gtu_num, threshold = 0, anim = False, gtu_range = 0):
         """
         plot the PDM
         input the level of data and GTU #
@@ -159,18 +160,20 @@ class DataVis():
         
         # get correct level of data
         if level == 1:
-            fs = self.zynq_data_l1[gtu_num]
+            pdm = self.zynq_data_l1
         elif level == 2:
-            fs = self.zynq_data_l2[gtu_num]
+            pdm = self.zynq_data_l2
         elif level == 3:
-            fs = self.zynq_data_l3[gtu_num]
+            pdm = self.zynq_data_l3
         else:
             print "ERROR: level not recognised"
 
         # make the plot    
-        pdm = DataVis._map_data(self, fs)
-        plot_focal_surface(pdm, threshold)
-
+        if anim == False: 
+            plot_focal_surface(pdm[gtu_num], threshold)
+        if anim == True:
+            anim_pdm(pdm, gtu_num, gtu_range, threshold)
+            
 
     def plot_sc_3d(self):
         """

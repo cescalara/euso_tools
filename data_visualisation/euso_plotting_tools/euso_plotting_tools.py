@@ -47,20 +47,37 @@ def plot_focal_surface(focal_surface, threshold = 0):
     cbar.formatter.set_powerlimits((0, 0))
     #cbar.set_clim(0, np.max(focal_surface))
 
-# Make function to animate packets around trigger
-# Not yet working...
-from matplotlib import animation, rc
-from IPython.display import HTML
-rc('animation', html='html5')
-def anim_focal_surface():
-    fig = plt.figure()
-    nt=0
-    ims = []
-    for add in np.arange(10):
-        im = plt.imshow(np.array(counts[int(frame[nt] + add)][:]).reshape(48, 48),
-                              cmap = cm.cubehelix, interpolation = 'nearest', animated = True)
-        ims.append([im])
+    return p
 
-    im_ani = animation.ArtistAnimation(fig, ims, interval=50, repeat_delay=3000, blit = False)
-    HTML(im_ani.to_html5_video())
-                                  
+
+# not working yet
+def anim_pdm(focal_surface_packet, gtu_num, gtu_range, threshold = 0):
+    """
+    animate the pdm over gtu_range
+    """
+    from matplotlib import animation, rc
+    from IPython.display import HTML
+    rc('animation', html='html5')
+    
+    fig = plt.figure(figsize = (10, 10))
+        
+    # inital frame
+    init_frame = focal_surface_packet[gtu_num]
+    if threshold == 0:
+        im = plt.imshow(init_frame, cmap = 'viridis', animated = True)
+    else:
+        im = plt.imshow(init_frame, cmap = 'viridis', animated = True, vmax = threshold)
+
+    gtu_num = 0
+    def updatefig(*args):
+        global frame, gtu_num
+        gtu_num += 1
+        frame = focal_surface_packet[gtu_num]
+        im.set_array(frame)
+        return im,
+    
+    # animation
+    anim = animation.FuncAnimation(fig, updatefig,
+                                       frames = gtu_range, interval = 500, blit = True)
+    HTML(anim.to_html5_video())
+
