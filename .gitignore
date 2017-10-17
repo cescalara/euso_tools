@@ -106,3 +106,6 @@ venv.bak/
 .DS_Store
 *.root
 *.dat
+
+# ignore etos/etot tools
+etot_and_etos/*
