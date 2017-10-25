@@ -8,6 +8,7 @@ N_OF_FRAMES_L2_V0 = 128
 N_OF_FRAMES_L3_V0 = 128
 
 NMAX_OF_THESHOLDS = 1024
+PAD_VAL = 4294967295
 
 class TimeStamp_symplified(Structure):
     _fields_ = [

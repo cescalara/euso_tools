@@ -25,7 +25,8 @@ class DataVis():
         self.zynq_data_l1 = np.zeros((N_OF_FRAMES_L1_V0, self._rows, self._cols))
         self.zynq_data_l2 = np.zeros((N_OF_FRAMES_L1_V0, self._rows, self._cols))
         self.zynq_data_l3 = np.zeros((N_OF_FRAMES_L1_V0, self._rows, self._cols))
-        self.scurve = np.zeros((NMAX_OF_THESHOLDS, N_OF_PIXEL_PER_PDM))
+        self._raw_scurve = np.zeros((NMAX_OF_THESHOLDS, N_OF_PIXEL_PER_PDM))
+        self.scurve = []
         
         self._file_type = None
 
@@ -100,10 +101,20 @@ class DataVis():
         pdm_flip = np.flip(pdm, 0)
         return pdm_flip
     
+
+    def _remove_sc_padding(self):
+        """
+        remove the padding from S-curve files
+        returns 
+        """
+        raw_scurve = self._raw_scurve.tolist()
+        self.scurve = [raw_scurve[i] for i in range(NMAX_OF_THESHOLDS) if raw_scurve[i][0] != PAD_VAL]
     
     def _read_data(self):
         """
         read the data from the file depending on the file type
+        performs mapping for PDM view data
+        removes padding from S-curve data, with PAD_VAL set in the data_format module
         """
 
         DataVis._classify_file(self)
@@ -134,8 +145,9 @@ class DataVis():
                 # put the scurve data into an indexed array
                 for i in range(NMAX_OF_THESHOLDS):
                     for j in range(N_OF_PIXEL_PER_PDM):     
-                        self.scurve[i][j] = raw_scurve.int32_data[i][j]                       
+                        self._raw_scurve[i][j] = raw_scurve.int32_data[i][j]                       
 
+                
         elif self._file_type == "cpu_sc":
 
             with open(self.filename, "rb") as sc_file:
@@ -148,8 +160,10 @@ class DataVis():
                 # put the scurve data into an indexed array
                 for i in range(NMAX_OF_THESHOLDS):
                     for j in range(N_OF_PIXEL_PER_PDM):     
-                        self.scurve[i][j] = scurve_packet.sc_data.payload.int32_data[i][j]                       
-
+                        self._raw_scurve[i][j] = scurve_packet.sc_data.payload.int32_data[i][j]                       
+        # remove padding from scurve
+        DataVis._remove_sc_padding(self)
+        
             
     def plot_pdm(self, level, gtu_num, threshold = 0, anim = False, gtu_range = 0):
         """
@@ -179,19 +193,22 @@ class DataVis():
         """
         plot a 3d view of the Scurve
         """
+        import matplotlib
         from mpl_toolkits.mplot3d import Axes3D
-
+        matplotlib.rcParams.update({'font.size': 22})
+        
         DataVis._read_data(self)
 
         fig = plt.figure(figsize = (10, 10))
         ax = fig.add_subplot(111, projection='3d')
-        nx, ny = NMAX_OF_THESHOLDS, N_OF_PIXEL_PER_PDM
+        nx, ny = np.shape(self.scurve)[0], N_OF_PIXEL_PER_PDM
         x = range(nx)
         y = range(ny)
     
         X, Y = np.meshgrid(x, y)
         
-        ax.plot_surface(X, Y, np.transpose(self.scurve), cmap = 'viridis')
+        ax.plot_surface(X, Y, np.transpose(np.array(self.scurve)), cmap = 'viridis')
+        ax.view_init(elev=5., azim=250)
 
     def plot_sc_2d(self, dac_level):
         """
@@ -200,7 +217,21 @@ class DataVis():
 
         DataVis._read_data(self)
 
-        sc_2d = self.scurve[dac_level][:]
+        sc_2d = self._raw_scurve[dac_level][:]
         pdm = DataVis._map_data(self, sc_2d)
         plot_focal_surface(pdm)
 
+    def plot_sc_1d(self):
+        """
+        plot a simple trace of all the pixel S-curves
+        """
+
+        import matplotlib
+        matplotlib.rcParams.update({'font.size': 22})
+        
+        DataVis._read_data(self)
+
+        plt.figure(figsize = (10, 10))
+        plt.plot(self.scurve)
+        plt.xlabel('DAC')
+        plt.ylabel('counts')
