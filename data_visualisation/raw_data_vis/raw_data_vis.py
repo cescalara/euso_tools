@@ -30,7 +30,8 @@ class DataVis():
         
         self._file_type = None
 
-        self.timestamp = 0
+        self.cpu_timestamp = 0
+        self.zynq_timestamp = 0
         self.cpu_packet_num = 0
         self.trig_packet_num = 0
         
@@ -129,8 +130,11 @@ class DataVis():
                 packet = CPU_PACKET()
                 size = cpu_file.readinto(packet)
 
-                # get the timestamp
-                self.timestamp = packet.cpu_time
+                # get the cpu_timestamp
+                self.cpu_timestamp = packet.cpu_time.cpu_time_stamp
+
+                #get the zynq_timestamp
+                self.zynq_timestamp = packet.zynq_packet.level1_data[self.trig_packet_num].payload.ts.n_gtu
                 
                 # put the zynq data into an indexed array
                 for i in range(N_OF_FRAMES_L1_V0):
@@ -160,9 +164,9 @@ class DataVis():
                 scurve_packet = SC_PACKET()
                 size = sc_file.readinto(scurve_packet)
 
-                # get the timestamp
-                self.timestamp = scurve_packet.cpu_time
-                
+                # get the cpu_timestamp
+                self.cpu_timestamp = scurve_packet.sc_time.cpu_time_stamp
+                  
                 # put the scurve data into an indexed array
                 for i in range(NMAX_OF_THESHOLDS):
                     for j in range(N_OF_PIXEL_PER_PDM):     
