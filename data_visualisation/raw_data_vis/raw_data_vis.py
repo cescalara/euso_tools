@@ -134,7 +134,9 @@ class DataVis():
                 self.cpu_timestamp = packet.cpu_time.cpu_time_stamp
 
                 #get the zynq_timestamp
-                self.zynq_timestamp = packet.zynq_packet.level1_data[self.trig_packet_num].payload.ts.n_gtu
+                self.zynq_timestamp_l1 = packet.zynq_packet.level1_data[self.trig_packet_num].payload.ts.n_gtu
+                self.zynq_timestamp_l2 = packet.zynq_packet.level2_data[self.trig_packet_num].payload.ts.n_gtu
+                self.zynq_timestamp_l3 = packet.zynq_packet.level3_data[self.trig_packet_num].payload.ts.n_gtu
                 
                 # put the zynq data into an indexed array
                 for i in range(N_OF_FRAMES_L1_V0):
