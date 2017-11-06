@@ -31,7 +31,10 @@ class DataVis():
         self._file_type = None
 
         self.cpu_timestamp = 0
-        self.zynq_timestamp = 0
+        self.zynq_timestamp_l1 = 0
+        self.zynq_timestamp_l2 = 0
+        self.zynq_timestamp_l3 = 0
+        
         self.cpu_packet_num = 0
         self.trig_packet_num = 0
         
