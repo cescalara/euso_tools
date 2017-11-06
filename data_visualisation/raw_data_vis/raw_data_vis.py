@@ -30,6 +30,7 @@ class DataVis():
         
         self._file_type = None
 
+        self.timestamp = 0
         self.cpu_packet_num = 0
         self.trig_packet_num = 0
         
@@ -105,7 +106,6 @@ class DataVis():
     def _remove_sc_padding(self):
         """
         remove the padding from S-curve files
-        returns 
         """
         raw_scurve = self._raw_scurve.tolist()
         self.scurve = [raw_scurve[i] for i in range(NMAX_OF_THESHOLDS) if raw_scurve[i][0] != PAD_VAL]
@@ -128,7 +128,10 @@ class DataVis():
                               + (sizeof(CPU_PACKET) * (self.cpu_packet_num)) )
                 packet = CPU_PACKET()
                 size = cpu_file.readinto(packet)
-            
+
+                # get the timestamp
+                self.timestamp = packet.cpu_time
+                
                 # put the zynq data into an indexed array
                 for i in range(N_OF_FRAMES_L1_V0):
                     self.zynq_data_l1[i] = DataVis._map_data(self, packet.zynq_packet.level1_data[self.trig_packet_num].payload.raw_data[i])
@@ -141,6 +144,9 @@ class DataVis():
 
                 raw_scurve = DATA_TYPE_SCURVE_V1()
                 size = sc_file.readinto(raw_scurve)
+
+                # get the timestamp
+                self.timestamp = packet.cpu_time
 
                 # put the scurve data into an indexed array
                 for i in range(NMAX_OF_THESHOLDS):
@@ -156,6 +162,9 @@ class DataVis():
                 sc_file.seek(sizeof(CpuFileHeader))
                 scurve_packet = SC_PACKET()
                 size = sc_file.readinto(scurve_packet)
+
+                # get the timestamp
+                self.timestamp = packet.cpu_time
                 
                 # put the scurve data into an indexed array
                 for i in range(NMAX_OF_THESHOLDS):
