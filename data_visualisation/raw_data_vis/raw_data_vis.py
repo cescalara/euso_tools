@@ -145,9 +145,6 @@ class DataVis():
                 raw_scurve = DATA_TYPE_SCURVE_V1()
                 size = sc_file.readinto(raw_scurve)
 
-                # get the timestamp
-                self.timestamp = packet.cpu_time
-
                 # put the scurve data into an indexed array
                 for i in range(NMAX_OF_THESHOLDS):
                     for j in range(N_OF_PIXEL_PER_PDM):     
@@ -164,7 +161,7 @@ class DataVis():
                 size = sc_file.readinto(scurve_packet)
 
                 # get the timestamp
-                self.timestamp = packet.cpu_time
+                self.timestamp = scurve_packet.cpu_time
                 
                 # put the scurve data into an indexed array
                 for i in range(NMAX_OF_THESHOLDS):
