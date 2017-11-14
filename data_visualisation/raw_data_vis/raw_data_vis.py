@@ -250,3 +250,46 @@ class DataVis():
         plt.plot(self.scurve)
         plt.xlabel('DAC')
         plt.ylabel('counts')
+
+    def _get_timestamps(self):
+        """
+        Get the timestamps for all packets in the CPU file
+        return an list of RUN_SIZE timestamps
+        """
+
+        with open(self.filename, "rb") as cpu_file:
+            timestamps = []
+            for i in range(RUN_SIZE):
+                # move to the desired packet
+                cpu_file.seek(sizeof(CpuFileHeader)
+                              + (sizeof(CPU_PACKET) * i))
+                packet = CPU_PACKET()
+                size = cpu_file.readinto(packet)
+
+                # get the cpu_timestamp
+                timestamps.append(packet.cpu_time.cpu_time_stamp)
+
+        return timestamps
+
+    def check_dead_time(self):
+
+        import matplotlib
+        matplotlib.rcParams.update({'font.size': 22})
+        
+        # read in time stamps
+        timestamps = DataVis._get_timestamps(self)
+
+        # scale to 0 s = beginning of run
+        ts_scaled = np.array(timestamps) - timestamps[0]
+
+        # compare to ideal delay based on read out
+        dt = 128 * 128 * 128 * 2.5e-6
+        
+        plt.figure(figsize = (10, 10))
+        plt.scatter(range(RUN_SIZE), ts_scaled, s = 300, alpha = 0.5, label = 'data')
+        plt.plot(range(RUN_SIZE), np.arange(0, RUN_SIZE, 1) * dt, color = 'k', linewidth = 5, alpha = 0.5, label = 'ideal case')
+        plt.xlabel('packet #')
+        plt.ylabel('timestamp [s]')
+        plt.legend(loc = 'best')
+        plt.grid()
+            

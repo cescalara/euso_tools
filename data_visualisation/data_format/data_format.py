@@ -13,6 +13,9 @@ MAX_PACKETS_L2 = 4
 MAX_PACKETS_L3 = 1
 N_OF_FRAMES_L1_V0 = 128
 
+# number of packets in one run file
+RUN_SIZE = 25
+
 #define structures
 class CpuFileHeader(Structure):
     _fields_ = [
