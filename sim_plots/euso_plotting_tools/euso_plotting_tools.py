@@ -45,6 +45,7 @@ def plot_focal_surface(focal_surface, threshold = 0):
     cbar=fig.colorbar(p, cax=cbar_ax)
     cbar.set_label('counts', x = 1.2)
     cbar.formatter.set_powerlimits((0, 0))
+    cbar.update_ticks()
     #cbar.set_clim(0, np.max(focal_surface))
 
     return p
