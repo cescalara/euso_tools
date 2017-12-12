@@ -5,7 +5,7 @@ from pdmdata import *
 # for the analog readout 
 N_CHANNELS_PHOTODIODE = 4
 N_CHANNELS_SIPM = 64
-N_CHANNELS_THERM = 16
+N_CHANNELS_THERM = 10
 
 # size of the zynq packets 
 MAX_PACKETS_L1 = 4
@@ -19,7 +19,7 @@ RUN_SIZE = 25
 #define structures
 class CpuFileHeader(Structure):
     _fields_ = [
-        ("spacer", c_uint16),
+        ("spacer", c_uint32),
         ("header", c_uint32),
         ("run_size", c_uint32),
     ]
@@ -27,7 +27,7 @@ class CpuFileHeader(Structure):
     
 class CpuFileTrailer(Structure):
     _fields_ = [
-        ("spacer", c_uint16),
+        ("spacer", c_uint32),
         ("run_size", c_uint32),
         ("crc", c_uint32),
     ]
@@ -35,7 +35,7 @@ class CpuFileTrailer(Structure):
     
 class CpuPktHeader(Structure):
     _fields_ = [
-        ("spacer", c_uint16),
+        ("spacer", c_uint32),
         ("header", c_uint32),
         ("pkt_size", c_uint32),
         ("pkt_num", c_uint32),
@@ -48,6 +48,14 @@ class CpuTimeStamp(Structure):
     ]   
     _pack_ = 1
     
+class THERM_PACKET(Structure):
+    _fields_ = [
+        ("therm_packet_header", CpuPktHeader),
+        ("therm_time", CpuTimeStamp),
+        ("therm_data", c_float * N_CHANNELS_THERM),
+    ]
+    _pack_ = 1
+    
 class HK_PACKET(Structure):
     _fields_ = [
         ("hk_packet_header", CpuPktHeader),
@@ -55,12 +63,13 @@ class HK_PACKET(Structure):
         ("photodiode_data", c_float * N_CHANNELS_PHOTODIODE),
         ("sipm_data", c_float * N_CHANNELS_SIPM),
         ("sipm_single", c_float),
-        ("therm_data", c_float * N_CHANNELS_THERM),
     ]
     _pack_ = 1
 
 class ZYNQ_PACKET(Structure):
     _fields_ = [
+        ("N1", c_uint8),
+        ("N2", c_uint8),
         ("level1_data", Z_DATA_TYPE_SCI_L1_V1 * MAX_PACKETS_L1),
         ("level2_data", Z_DATA_TYPE_SCI_L2_V1 * MAX_PACKETS_L2),
         ("level3_data", Z_DATA_TYPE_SCI_L3_V1),        
@@ -71,8 +80,8 @@ class CPU_PACKET(Structure):
     _fields_ = [
         ("cpu_packet_header", CpuPktHeader),
         ("cpu_time", CpuTimeStamp),
-        ("zynq_packet", ZYNQ_PACKET),
         ("hk_packet", HK_PACKET),
+        ("zynq_packet", ZYNQ_PACKET),
     ]
     _pack_ = 1
 
