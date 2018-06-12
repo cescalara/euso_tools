@@ -1,5 +1,11 @@
 from ctypes import *
 
+__all__ = ['TimeStamp_dual', 'ZynqBoardHeader', 'DATA_TYPE_SCI_L1_V1', 'Z_DATA_TYPE_SCI_L1_V1',
+           'DATA_TYPE_SCI_L2_V1', 'Z_DATA_TYPE_SCI_L2_V1', 'DATA_TYPE_SCI_L3_V1',
+           'Z_DATA_TYPE_SCI_L3_V1','DATA_TYPE_SCURVE_V1', 'Z_DATA_TYPE_SCURVE_V1',
+           'N_OF_PIXEL_PER_PDM', 'N_OF_FRAMES_L1_V0', 'N_OF_FRAMES_L2_V0', 'N_OF_FRAMES_L3_V0',
+           'NMAX_OF_THESHOLDS', 'PAD_VAL']
+
 #define constants
 N_OF_PIXEL_PER_PDM = 2304
 

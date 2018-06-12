@@ -1,5 +1,10 @@
 from ctypes import *
-from pdmdata import *
+from .pdmdata import *
+
+__all__ = ['CpuFileHeader', 'CpuFileTrailer', 'CpuPktHeader', 'CpuTimeStamp',
+           'THERM_PACKET', 'HK_PACKET', 'ZYNQ_PACKET', 'CPU_PACKET', 'SC_PACKET',
+           'N_CHANNELS_PHOTODIODE', 'N_CHANNELS_SIPM', 'N_CHANNELS_THERM', 'MAX_PACKETS_L1',
+           'MAX_PACKETS_L2', 'MAX_PACKETS_L3', 'N_OF_FRAMES_L1_V0', 'RUN_SIZE']
 
 #define constants
 # for the analog readout 

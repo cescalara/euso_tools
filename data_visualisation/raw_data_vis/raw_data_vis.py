@@ -1,9 +1,11 @@
-
+from ctypes import *
 from data_format import *
 import numpy as np
 from matplotlib import pyplot as plt
 from euso_plotting_tools import *
 from contextlib import contextmanager
+
+__all__ = ['DataVis']
 
 class DataVis():
     """
@@ -57,7 +59,7 @@ class DataVis():
         elif "scurve" in self.filename:
             self._file_type = "raw_sc"
         else:
-            print "ERROR: file type is not recognised"
+            print ("ERROR: file type is not recognised")
             
     def _map_data(self, input_data):
         """
@@ -195,7 +197,7 @@ class DataVis():
         elif level == 3:
             pdm = self.zynq_data_l3
         else:
-            print "ERROR: level not recognised"
+            print ("ERROR: level not recognised")
 
         # make the plot    
         if anim == False: 
@@ -236,7 +238,7 @@ class DataVis():
         pdm = DataVis._map_data(self, sc_2d)
         plot_focal_surface(pdm)
 
-    def plot_sc_1d(self):
+    def plot_sc_1d(self, max_y = -1):
         """
         plot a simple trace of all the pixel S-curves
         """
@@ -250,6 +252,8 @@ class DataVis():
         plt.plot(self.scurve)
         plt.xlabel('DAC')
         plt.ylabel('counts')
+        if max_y != -1:
+            plt.ylim(0, max_y)
 
     def _get_timestamps(self):
         """
